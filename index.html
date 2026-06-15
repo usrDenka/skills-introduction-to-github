@@ -7,28 +7,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg-dark: #05050f;
-  --bg-panel: #0b0b1e;
-  --bg-panel2: #0f0f28;
-  --border-gold: #c8a84b;
-  --border-gold-dim: #7a6428;
-  --text-gold: #f0c060;
-  --text-white: #e8e8f0;
-  --text-dim: #8888aa;
-  --text-green: #50e050;
-  --text-red: #ff5050;
-  --text-blue: #5090ff;
-  --text-purple: #cc80ff;
-  --text-cyan: #40d0d0;
-  --hp-color: #e04040;
-  --mp-color: #4060e0;
-  --xp-color: #40c040;
-  --hp-bg: #3a0000;
-  --mp-bg: #001040;
-  --xp-bg: #003a00;
-  --highlight: #1e1e48;
-  --selected: #2a2a60;
-  --corner-size: 8px;
+  /* Monokai palette */
+  --bg-dark:       #1a1b16;
+  --bg-panel:      #272822;
+  --bg-panel2:     #2d2e27;
+  --border-gold:   #E6DB74;
+  --border-gold-dim: #75715E;
+  --text-gold:     #E6DB74;
+  --text-white:    #F8F8F2;
+  --text-dim:      #75715E;
+  --text-green:    #A6E22E;
+  --text-red:      #F92672;
+  --text-blue:     #66D9EF;
+  --text-purple:   #AE81FF;
+  --text-cyan:     #66D9EF;
+  --hp-color:      #F92672;
+  --mp-color:      #66D9EF;
+  --xp-color:      #A6E22E;
+  --hp-bg:         #3a0617;
+  --mp-bg:         #062a2a;
+  --xp-bg:         #1a2a04;
+  --highlight:     #3E3D32;
+  --selected:      #49483E;
+  --corner-size:   8px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -41,23 +42,23 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   background-image:
-    radial-gradient(ellipse at 20% 50%, rgba(30,20,80,0.3) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 20%, rgba(20,10,60,0.2) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 50%, rgba(166,226,46,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(102,217,239,0.04) 0%, transparent 50%);
 }
 
-/* Stars background */
+/* Subtle scanline texture */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   background-image:
-    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 30% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 50% 40%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 70% 10%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 55% 90%, rgba(255,255,255,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 10% 20%, rgba(230,219,116,0.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 70%, rgba(166,226,46,0.15) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 40%, rgba(102,217,239,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 10%, rgba(230,219,116,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 60%, rgba(174,129,255,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 85%, rgba(166,226,46,0.15) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 90%, rgba(102,217,239,0.15) 0%, transparent 100%),
     radial-gradient(1px 1px at 80% 80%, rgba(255,255,255,0.3) 0%, transparent 100%);
   pointer-events: none;
   z-index: 0;
@@ -69,8 +70,8 @@ body::before {
   border: 2px solid var(--border-gold);
   box-shadow:
     0 0 0 1px var(--border-gold-dim),
-    inset 0 0 30px rgba(0,0,10,0.8),
-    0 0 20px rgba(200,168,75,0.15);
+    inset 0 0 30px rgba(0,0,0,0.6),
+    0 0 20px rgba(230,219,116,0.08);
   position: relative;
 }
 
@@ -113,7 +114,7 @@ body::before {
 #title-text {
   color: var(--text-gold);
   font-size: 14px;
-  text-shadow: 0 0 10px rgba(240,192,96,0.6);
+  text-shadow: 0 0 10px rgba(230,219,116,0.5);
   letter-spacing: 2px;
 }
 
@@ -148,7 +149,7 @@ body::before {
   border-color: var(--border-gold);
   border-bottom-color: var(--bg-panel2);
   color: var(--text-gold);
-  text-shadow: 0 0 8px rgba(240,192,96,0.5);
+  text-shadow: 0 0 8px rgba(230,219,116,0.5);
   bottom: -2px;
 }
 
@@ -183,7 +184,7 @@ body::before {
   align-items: center;
   justify-content: center;
   font-size: 48px;
-  box-shadow: 0 0 16px rgba(200,168,75,0.3);
+  box-shadow: 0 0 16px rgba(230,219,116,0.2);
   position: relative;
   overflow: hidden;
   cursor: pointer;
@@ -205,7 +206,7 @@ body::before {
   color: var(--text-gold);
   font-size: 11px;
   margin-bottom: 4px;
-  text-shadow: 0 0 6px rgba(240,192,96,0.4);
+  text-shadow: 0 0 6px rgba(230,219,116,0.35);
 }
 
 #char-class {
@@ -449,7 +450,7 @@ body::before {
 }
 
 .inv-item.selected {
-  box-shadow: 0 0 8px rgba(200,168,75,0.4);
+  box-shadow: 0 0 8px rgba(230,219,116,0.4);
 }
 
 .inv-item-icon { font-size: 22px; line-height: 1; }
@@ -470,7 +471,7 @@ body::before {
 .inv-item-rarity-uncommon  { border-color: #40a040; }
 .inv-item-rarity-rare      { border-color: #4060e0; }
 .inv-item-rarity-epic      { border-color: #8040d0; }
-.inv-item-rarity-legendary { border-color: #d08020; box-shadow: 0 0 6px rgba(208,128,32,0.4); }
+.inv-item-rarity-legendary { border-color: #FD971F; box-shadow: 0 0 6px rgba(253,151,31,0.5); }
 
 /* Item detail */
 #item-detail {
@@ -568,11 +569,11 @@ body::before {
 }
 
 .map-cell:hover { background: rgba(200,168,75,0.1); }
-.map-cell.player { background: rgba(200,168,75,0.2); animation: pulse-player 1.5s infinite; }
+.map-cell.player { background: rgba(230,219,116,0.2); animation: pulse-player 1.5s infinite; }
 
 @keyframes pulse-player {
-  0%, 100% { background: rgba(200,168,75,0.2); }
-  50% { background: rgba(200,168,75,0.4); }
+  0%, 100% { background: rgba(230,219,116,0.2); }
+  50% { background: rgba(230,219,116,0.4); }
 }
 
 /* Map cell types */
@@ -710,7 +711,7 @@ body::before {
   max-width: 95vw;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 0 40px rgba(200,168,75,0.3);
+  box-shadow: 0 0 40px rgba(230,219,116,0.2);
 }
 
 .modal-title {
@@ -1213,7 +1214,7 @@ const MAP_TILES = [
 ];
 
 const PORTRAITS = ['⚔️','🧙','🏹','🛡️','🗡️','⚡','🔥','🌿','💀','🐉','🦸','🧝','🧛','🧟','🦊','🐺','👑','💎','🌙','☀️','🌟','🔮','🪄','🏰'];
-const RARITY_COLORS = { common: '#aaaaaa', uncommon: '#40a040', rare: '#4060e0', epic: '#8040d0', legendary: '#d08020' };
+const RARITY_COLORS = { common: '#75715E', uncommon: '#A6E22E', rare: '#66D9EF', epic: '#AE81FF', legendary: '#FD971F' };
 
 let character = JSON.parse(JSON.stringify(DEFAULT_CHARACTER));
 let selectedItemId = null;
