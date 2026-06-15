@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPG Menu UI</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-dark: #05050f;
+  --bg-panel: #0b0b1e;
+  --bg-panel2: #0f0f28;
+  --border-gold: #c8a84b;
+  --border-gold-dim: #7a6428;
+  --text-gold: #f0c060;
+  --text-white: #e8e8f0;
+  --text-dim: #8888aa;
+  --text-green: #50e050;
+  --text-red: #ff5050;
+  --text-blue: #5090ff;
+  --text-purple: #cc80ff;
+  --text-cyan: #40d0d0;
+  --hp-color: #e04040;
+  --mp-color: #4060e0;
+  --xp-color: #40c040;
+  --hp-bg: #3a0000;
+  --mp-bg: #001040;
+  --xp-bg: #003a00;
+  --highlight: #1e1e48;
+  --selected: #2a2a60;
+  --corner-size: 8px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg-dark);
+  color: var(--text-white);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(30,20,80,0.3) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(20,10,60,0.2) 0%, transparent 50%);
+}
+
+/* Stars background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 40%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 10%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 90%, rgba(255,255,255,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 80%, rgba(255,255,255,0.3) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Panel border mixin */
+.panel {
+  background: var(--bg-panel);
+  border: 2px solid var(--border-gold);
+  box-shadow:
+    0 0 0 1px var(--border-gold-dim),
+    inset 0 0 30px rgba(0,0,10,0.8),
+    0 0 20px rgba(200,168,75,0.15);
+  position: relative;
+}
+
+.panel::before, .panel::after,
+.panel-tl::before, .panel-tr::before {
+  content: '◆';
+  position: absolute;
+  color: var(--border-gold);
+  font-size: 8px;
+  line-height: 1;
+}
+.panel::before { top: -6px; left: -6px; }
+.panel::after  { top: -6px; right: -6px; }
+
+.panel-corners::before { bottom: -6px; left: -6px; position: absolute; content: '◆'; color: var(--border-gold); font-size: 8px; }
+.panel-corners::after  { bottom: -6px; right: -6px; position: absolute; content: '◆'; color: var(--border-gold); font-size: 8px; }
+
+/* ===== MAIN LAYOUT ===== */
+#app {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 12px;
+  min-height: 100vh;
+}
+
+/* ===== TITLE BAR ===== */
+#title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-gold-dim);
+}
+
+#title-text {
+  color: var(--text-gold);
+  font-size: 14px;
+  text-shadow: 0 0 10px rgba(240,192,96,0.6);
+  letter-spacing: 2px;
+}
+
+#title-actions { display: flex; gap: 8px; }
+
+/* ===== NAV TABS ===== */
+#nav-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.tab-btn {
+  background: var(--bg-panel);
+  border: 2px solid var(--border-gold-dim);
+  color: var(--text-dim);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  bottom: 0;
+}
+
+.tab-btn:hover {
+  border-color: var(--border-gold);
+  color: var(--text-gold);
+}
+
+.tab-btn.active {
+  background: var(--bg-panel2);
+  border-color: var(--border-gold);
+  border-bottom-color: var(--bg-panel2);
+  color: var(--text-gold);
+  text-shadow: 0 0 8px rgba(240,192,96,0.5);
+  bottom: -2px;
+}
+
+/* ===== MAIN CONTENT ===== */
+#main {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+/* ===== SIDEBAR ===== */
+#sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Character card */
+#char-card {
+  padding: 16px 12px;
+  text-align: center;
+}
+
+#char-portrait {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 12px;
+  border: 2px solid var(--border-gold);
+  background: var(--bg-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  box-shadow: 0 0 16px rgba(200,168,75,0.3);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+#char-portrait:hover::after {
+  content: 'CHANGE';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: var(--text-gold);
+}
+
+#char-name {
+  color: var(--text-gold);
+  font-size: 11px;
+  margin-bottom: 4px;
+  text-shadow: 0 0 6px rgba(240,192,96,0.4);
+}
+
+#char-class {
+  color: var(--text-purple);
+  font-size: 8px;
+  margin-bottom: 2px;
+}
+
+#char-level {
+  color: var(--text-cyan);
+  font-size: 8px;
+  margin-bottom: 12px;
+}
+
+/* Stat bars */
+.stat-bar-wrap { margin: 6px 0; }
+
+.stat-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8px;
+  margin-bottom: 3px;
+}
+
+.stat-bar-track {
+  height: 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  transition: width 0.6s ease;
+  position: relative;
+}
+
+.stat-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.3);
+}
+
+.hp-bar { background: var(--hp-color); }
+.hp-track { background: var(--hp-bg); }
+.hp-label { color: var(--hp-color); }
+
+.mp-bar { background: var(--mp-color); }
+.mp-track { background: var(--mp-bg); }
+.mp-label { color: var(--text-blue); }
+
+.xp-bar { background: var(--xp-color); }
+.xp-track { background: var(--xp-bg); }
+.xp-label { color: var(--text-green); }
+
+/* Status effects */
+#status-effects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px;
+  min-height: 28px;
+}
+
+.status-tag {
+  font-size: 7px;
+  padding: 3px 6px;
+  border: 1px solid;
+  border-radius: 2px;
+}
+
+.status-buff  { color: #60ff80; border-color: #30a040; background: rgba(0,80,0,0.3); }
+.status-debuff { color: #ff6060; border-color: #a03030; background: rgba(80,0,0,0.3); }
+
+/* Location */
+#location-panel { padding: 10px 12px; }
+#location-title { color: var(--text-dim); font-size: 7px; margin-bottom: 6px; }
+#location-name  { color: var(--text-cyan); font-size: 9px; }
+#location-area  { color: var(--text-dim); font-size: 7px; margin-top: 3px; }
+
+/* Sidebar buttons */
+.sidebar-btn {
+  width: 100%;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-gold-dim);
+  color: var(--text-gold);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  padding: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sidebar-btn:hover {
+  background: var(--highlight);
+  border-color: var(--border-gold);
+}
+
+/* ===== CONTENT PANELS ===== */
+#content { min-height: 500px; }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ===== STATUS PANEL ===== */
+#panel-status { padding: 16px; }
+
+.section-title {
+  color: var(--text-gold);
+  font-size: 10px;
+  border-bottom: 1px solid var(--border-gold-dim);
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  letter-spacing: 2px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.stat-box {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-gold-dim);
+  padding: 10px 8px;
+  text-align: center;
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.stat-box:hover {
+  border-color: var(--border-gold);
+  background: var(--highlight);
+}
+
+.stat-name { color: var(--text-dim); font-size: 7px; margin-bottom: 6px; }
+.stat-val  { color: var(--text-white); font-size: 16px; }
+.stat-mod  { color: var(--text-green); font-size: 7px; margin-top: 4px; }
+
+/* Equip slots */
+.equip-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.equip-slot {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-gold-dim);
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.equip-slot:hover { border-color: var(--border-gold); background: var(--highlight); }
+.equip-slot-icon { font-size: 18px; width: 28px; text-align: center; }
+.equip-slot-info {}
+.equip-slot-type { color: var(--text-dim); font-size: 6px; margin-bottom: 3px; }
+.equip-slot-name { color: var(--text-white); font-size: 8px; }
+.equip-slot-name.empty { color: var(--text-dim); font-style: italic; }
+
+/* Elemental affinities */
+.affinity-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.affinity-badge {
+  font-size: 7px;
+  padding: 4px 8px;
+  border: 1px solid;
+}
+
+/* ===== INVENTORY PANEL ===== */
+#panel-inventory { padding: 16px; }
+
+.inv-categories {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.cat-btn {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-gold-dim);
+  color: var(--text-dim);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cat-btn.active, .cat-btn:hover {
+  border-color: var(--border-gold);
+  color: var(--text-gold);
+  background: var(--highlight);
+}
+
+.inv-layout {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 12px;
+}
+
+.inv-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.inv-item {
+  aspect-ratio: 1;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-gold-dim);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  padding: 4px;
+}
+
+.inv-item:hover, .inv-item.selected {
+  border-color: var(--border-gold);
+  background: var(--highlight);
+}
+
+.inv-item.selected {
+  box-shadow: 0 0 8px rgba(200,168,75,0.4);
+}
+
+.inv-item-icon { font-size: 22px; line-height: 1; }
+.inv-item-qty {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  color: var(--text-white);
+  font-size: 6px;
+}
+
+.inv-item-empty {
+  border-color: rgba(255,255,255,0.05);
+  cursor: default;
+}
+
+.inv-item-rarity-common    { border-color: #888; }
+.inv-item-rarity-uncommon  { border-color: #40a040; }
+.inv-item-rarity-rare      { border-color: #4060e0; }
+.inv-item-rarity-epic      { border-color: #8040d0; }
+.inv-item-rarity-legendary { border-color: #d08020; box-shadow: 0 0 6px rgba(208,128,32,0.4); }
+
+/* Item detail */
+#item-detail {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-gold-dim);
+  padding: 12px;
+  min-height: 200px;
+}
+
+#item-detail-empty {
+  color: var(--text-dim);
+  font-size: 8px;
+  text-align: center;
+  padding-top: 40px;
+}
+
+#item-detail-content { display: none; }
+#item-detail-content.visible { display: block; }
+
+#item-icon-big { font-size: 36px; text-align: center; margin-bottom: 8px; }
+#item-name { color: var(--text-gold); font-size: 9px; text-align: center; margin-bottom: 4px; }
+#item-rarity { text-align: center; font-size: 7px; margin-bottom: 10px; }
+#item-type { color: var(--text-dim); font-size: 7px; margin-bottom: 8px; }
+#item-desc { color: var(--text-white); font-size: 7px; line-height: 1.8; margin-bottom: 10px; }
+
+.item-stat-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 7px;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.item-stat-val.pos { color: var(--text-green); }
+.item-stat-val.neg { color: var(--text-red); }
+
+#item-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.item-action-btn {
+  flex: 1;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-gold-dim);
+  color: var(--text-gold);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.item-action-btn:hover {
+  background: var(--highlight);
+  border-color: var(--border-gold);
+}
+
+/* ===== MAP PANEL ===== */
+#panel-map { padding: 16px; }
+
+.map-layout {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: 12px;
+}
+
+#map-canvas-wrap {
+  background: #030312;
+  border: 2px solid var(--border-gold-dim);
+  padding: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+#map-grid {
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  gap: 1px;
+  font-size: 11px;
+  line-height: 1;
+  font-family: monospace;
+}
+
+.map-cell {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.1s;
+  font-size: 10px;
+}
+
+.map-cell:hover { background: rgba(200,168,75,0.1); }
+.map-cell.player { background: rgba(200,168,75,0.2); animation: pulse-player 1.5s infinite; }
+
+@keyframes pulse-player {
+  0%, 100% { background: rgba(200,168,75,0.2); }
+  50% { background: rgba(200,168,75,0.4); }
+}
+
+/* Map cell types */
+.mc-water  { color: #2060a0; }
+.mc-grass  { color: #308030; }
+.mc-forest { color: #1a6020; }
+.mc-mount  { color: #806060; }
+.mc-desert { color: #a09040; }
+.mc-town   { color: #d0a060; cursor: pointer; }
+.mc-dungeon { color: #8040a0; }
+.mc-path   { color: #806040; }
+.mc-void   { color: #0a0a18; }
+.mc-player { color: var(--text-gold); font-size: 12px; }
+
+/* Fog of war */
+.mc-fog { opacity: 0.15; }
+
+/* Map locations list */
+#map-locations {}
+.location-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  cursor: pointer;
+  font-size: 7px;
+  transition: background 0.15s;
+}
+
+.location-item:hover { background: var(--highlight); }
+.location-item.visited { color: var(--text-white); }
+.location-item.unvisited { color: var(--text-dim); }
+.location-item.current { color: var(--text-gold); }
+
+.loc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.loc-dot.town   { background: #d0a060; }
+.loc-dot.dungeon { background: #8040a0; }
+.loc-dot.wild   { background: #308030; }
+.loc-dot.special { background: #40c0c0; }
+
+#map-info {
+  margin-top: 10px;
+  padding: 8px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-gold-dim);
+  font-size: 7px;
+}
+
+/* ===== SKILLS PANEL ===== */
+#panel-skills { padding: 16px; }
+
+.skills-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.skill-item {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-gold-dim);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.skill-item:hover { border-color: var(--border-gold); background: var(--highlight); }
+
+.skill-icon { font-size: 24px; width: 36px; text-align: center; }
+.skill-info {}
+.skill-name { color: var(--text-white); font-size: 8px; margin-bottom: 4px; }
+.skill-desc { color: var(--text-dim); font-size: 6px; line-height: 1.6; }
+.skill-cost { color: var(--text-blue); font-size: 6px; margin-top: 4px; }
+.skill-level { color: var(--text-gold); font-size: 6px; }
+
+/* Skill level bar */
+.skill-lvl-bar {
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+  margin-top: 4px;
+}
+.skill-lvl-fill {
+  height: 100%;
+  background: var(--text-gold);
+}
+
+/* ===== FOOTER / HELP BAR ===== */
+#help-bar {
+  display: flex;
+  gap: 16px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border-gold-dim);
+  flex-wrap: wrap;
+}
+
+.help-key {
+  color: var(--text-dim);
+  font-size: 7px;
+}
+
+.help-key span {
+  color: var(--text-gold);
+  border: 1px solid var(--border-gold-dim);
+  padding: 1px 4px;
+  margin-right: 4px;
+}
+
+/* ===== MODAL ===== */
+#modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+#modal-overlay.open { display: flex; }
+
+#modal-box {
+  background: var(--bg-panel);
+  border: 2px solid var(--border-gold);
+  padding: 24px;
+  width: 560px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 0 40px rgba(200,168,75,0.3);
+}
+
+.modal-title {
+  color: var(--text-gold);
+  font-size: 12px;
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-gold-dim);
+}
+
+.form-row { margin-bottom: 14px; }
+
+.form-label {
+  display: block;
+  color: var(--text-dim);
+  font-size: 7px;
+  margin-bottom: 6px;
+}
+
+.form-input {
+  width: 100%;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-gold-dim);
+  color: var(--text-white);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.form-input:focus { border-color: var(--border-gold); }
+
+.form-select {
+  width: 100%;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-gold-dim);
+  color: var(--text-white);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  padding: 8px 10px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.form-row-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+
+.stat-input-wrap { text-align: center; }
+.stat-input-wrap .form-label { text-align: center; }
+.stat-input-wrap .form-input { text-align: center; }
+
+.portrait-picker {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.portrait-opt {
+  aspect-ratio: 1;
+  border: 2px solid var(--border-gold-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  background: var(--bg-dark);
+  transition: all 0.15s;
+}
+
+.portrait-opt:hover, .portrait-opt.selected {
+  border-color: var(--border-gold);
+  background: var(--highlight);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-gold-dim);
+}
+
+.btn-primary, .btn-secondary {
+  flex: 1;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  padding: 10px;
+  cursor: pointer;
+  border: 2px solid;
+  transition: all 0.15s;
+}
+
+.btn-primary {
+  background: #1a3010;
+  border-color: #40a040;
+  color: var(--text-green);
+}
+
+.btn-primary:hover { background: #254018; box-shadow: 0 0 10px rgba(64,160,64,0.3); }
+
+.btn-secondary {
+  background: var(--bg-dark);
+  border-color: var(--border-gold-dim);
+  color: var(--text-dim);
+}
+
+.btn-secondary:hover { border-color: var(--border-gold); color: var(--text-gold); }
+
+/* ===== ADD ITEM MODAL ===== */
+#item-form { margin-top: 12px; }
+
+/* ===== NOTIFICATIONS ===== */
+#notif-area {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notif {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-gold);
+  padding: 10px 14px;
+  font-size: 8px;
+  color: var(--text-gold);
+  animation: slideIn 0.3s ease, fadeOut 0.5s 2.5s ease forwards;
+  max-width: 280px;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; transform: translateX(20px); }
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: var(--border-gold-dim); }
+::-webkit-scrollbar-thumb:hover { background: var(--border-gold); }
+
+/* ===== BLINKING CURSOR ===== */
+.blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ===== GOLD DIVIDER ===== */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+  margin: 12px 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 860px) {
+  #main { grid-template-columns: 1fr; }
+  #sidebar { display: grid; grid-template-columns: 1fr 1fr; }
+  .inv-grid { grid-template-columns: repeat(4, 1fr); }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .map-layout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  #title-text { font-size: 10px; }
+  .tab-btn { font-size: 7px; padding: 6px 8px; }
+  .inv-grid { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div id="notif-area"></div>
+
+<!-- ===== MODAL ===== -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <div class="modal-title" id="modal-title">CHARACTER SETUP</div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app">
+
+  <!-- Title Bar -->
+  <div id="title-bar" class="panel">
+    <div id="title-text">⚔ REALM QUEST ⚔</div>
+    <div id="title-actions">
+      <button class="sidebar-btn" onclick="openCharSetup()" style="width:auto;font-size:7px;padding:6px 10px;">⚙ CONFIGURE</button>
+      <button class="sidebar-btn" onclick="saveToLocal()" style="width:auto;font-size:7px;padding:6px 10px;">💾 SAVE</button>
+      <button class="sidebar-btn" onclick="openAddItemModal()" style="width:auto;font-size:7px;padding:6px 10px;">+ ADD ITEM</button>
+    </div>
+  </div>
+
+  <!-- Nav Tabs -->
+  <div id="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('status')" id="tab-status">📊 STATUS</button>
+    <button class="tab-btn" onclick="switchTab('inventory')" id="tab-inventory">🎒 INVENTORY</button>
+    <button class="tab-btn" onclick="switchTab('map')" id="tab-map">🗺 MAP</button>
+    <button class="tab-btn" onclick="switchTab('skills')" id="tab-skills">✨ SKILLS</button>
+  </div>
+
+  <!-- Main -->
+  <div id="main">
+
+    <!-- Sidebar -->
+    <div id="sidebar">
+      <!-- Character Card -->
+      <div class="panel" id="char-card" style="padding-bottom:12px;">
+        <div id="char-portrait" onclick="openPortraitPicker()" title="Click to change portrait">
+          <span id="portrait-emoji">⚔️</span>
+        </div>
+        <div id="char-name">HERO NAME</div>
+        <div id="char-class">Warrior</div>
+        <div id="char-level">LV. 1 &nbsp;|&nbsp; <span style="color:var(--text-dim)">NOVICE</span></div>
+
+        <div class="divider"></div>
+
+        <!-- HP Bar -->
+        <div class="stat-bar-wrap">
+          <div class="stat-bar-label">
+            <span class="hp-label">HP</span>
+            <span id="hp-text" style="color:var(--text-white)">100/100</span>
+          </div>
+          <div class="stat-bar-track hp-track">
+            <div class="stat-bar-fill hp-bar" id="hp-bar" style="width:100%"></div>
+          </div>
+        </div>
+
+        <!-- MP Bar -->
+        <div class="stat-bar-wrap">
+          <div class="stat-bar-label">
+            <span class="mp-label">MP</span>
+            <span id="mp-text" style="color:var(--text-white)">50/50</span>
+          </div>
+          <div class="stat-bar-track mp-track">
+            <div class="stat-bar-fill mp-bar" id="mp-bar" style="width:100%"></div>
+          </div>
+        </div>
+
+        <!-- XP Bar -->
+        <div class="stat-bar-wrap">
+          <div class="stat-bar-label">
+            <span class="xp-label">EXP</span>
+            <span id="xp-text" style="color:var(--text-green)">0/100</span>
+          </div>
+          <div class="stat-bar-track xp-track">
+            <div class="stat-bar-fill xp-bar" id="xp-bar" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Status Effects -->
+        <div id="status-effects"></div>
+      </div>
+
+      <!-- Location -->
+      <div class="panel" id="location-panel">
+        <div id="location-title">📍 CURRENT LOCATION</div>
+        <div id="location-name">Starter Village</div>
+        <div id="location-area" style="margin-top:4px;"></div>
+      </div>
+
+      <!-- Gold -->
+      <div class="panel" style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="color:var(--text-dim);font-size:7px;">💰 GOLD</span>
+        <span id="gold-display" style="color:var(--text-gold);font-size:11px;">0</span>
+      </div>
+
+      <!-- Play Time -->
+      <div class="panel" style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="color:var(--text-dim);font-size:7px;">⏱ PLAYTIME</span>
+        <span id="playtime" style="color:var(--text-cyan);font-size:9px;">00:00:00</span>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content" class="panel">
+
+      <!-- STATUS TAB -->
+      <div class="tab-panel active" id="panel-status">
+        <div class="section-title">CHARACTER STATUS</div>
+
+        <!-- Core Stats -->
+        <div class="stats-grid" id="stats-grid">
+          <!-- filled by JS -->
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Equipment -->
+        <div class="section-title" style="font-size:8px;margin-top:12px;">EQUIPMENT</div>
+        <div class="equip-grid" id="equip-grid">
+          <!-- filled by JS -->
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Affinities -->
+        <div class="section-title" style="font-size:8px;">ELEMENTAL AFFINITIES</div>
+        <div class="affinity-row" id="affinity-row">
+          <!-- filled by JS -->
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Biography -->
+        <div class="section-title" style="font-size:8px;">BIOGRAPHY</div>
+        <div id="char-bio" style="color:var(--text-dim);font-size:7px;line-height:2;"></div>
+      </div>
+
+      <!-- INVENTORY TAB -->
+      <div class="tab-panel" id="panel-inventory">
+        <div class="section-title">INVENTORY</div>
+        <div class="inv-categories">
+          <button class="cat-btn active" onclick="filterInventory('all')" id="cat-all">ALL</button>
+          <button class="cat-btn" onclick="filterInventory('weapon')" id="cat-weapon">⚔ WEAPONS</button>
+          <button class="cat-btn" onclick="filterInventory('armor')" id="cat-armor">🛡 ARMOR</button>
+          <button class="cat-btn" onclick="filterInventory('item')" id="cat-item">🧪 ITEMS</button>
+          <button class="cat-btn" onclick="filterInventory('key')" id="cat-key">🔑 KEY</button>
+        </div>
+        <div class="inv-layout">
+          <div class="inv-grid" id="inv-grid"></div>
+          <div id="item-detail">
+            <div id="item-detail-empty">Select an item<br><br>to view details<span class="blink">_</span></div>
+            <div id="item-detail-content">
+              <div id="item-icon-big"></div>
+              <div id="item-name"></div>
+              <div id="item-rarity"></div>
+              <div class="divider" style="margin:6px 0;"></div>
+              <div id="item-type"></div>
+              <div id="item-desc"></div>
+              <div id="item-stats"></div>
+              <div id="item-actions">
+                <button class="item-action-btn" id="item-use-btn" onclick="useItem()">USE</button>
+                <button class="item-action-btn" id="item-drop-btn" onclick="dropItem()">DROP</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAP TAB -->
+      <div class="tab-panel" id="panel-map">
+        <div class="section-title">WORLD MAP</div>
+        <div class="map-layout">
+          <div>
+            <div id="map-canvas-wrap">
+              <div id="map-grid"></div>
+            </div>
+            <div id="map-info" style="margin-top:8px;">
+              <span style="color:var(--text-dim);">▶ Click a location on the map to travel there</span>
+            </div>
+          </div>
+          <div>
+            <div class="section-title" style="font-size:8px;">KNOWN LOCATIONS</div>
+            <div id="map-locations"></div>
+            <div class="divider"></div>
+            <div id="map-legend" style="font-size:7px;">
+              <div style="color:var(--text-dim);margin-bottom:6px;">LEGEND</div>
+              <div style="margin:3px 0;"><span style="color:#308030;">♣</span> Forest &nbsp; <span style="color:#2060a0;">~</span> Water</div>
+              <div style="margin:3px 0;"><span style="color:#806060;">▲</span> Mountain &nbsp; <span style="color:#a09040;">·</span> Desert</div>
+              <div style="margin:3px 0;"><span style="color:#d0a060;">⌂</span> Town &nbsp; <span style="color:#8040a0;">☠</span> Dungeon</div>
+              <div style="margin:3px 0;"><span style="color:var(--text-gold);">★</span> You are here</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SKILLS TAB -->
+      <div class="tab-panel" id="panel-skills">
+        <div class="section-title">SKILLS & ABILITIES</div>
+        <div class="skills-layout" id="skills-grid">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Help Bar -->
+  <div id="help-bar">
+    <span class="help-key"><span>Z</span>Confirm</span>
+    <span class="help-key"><span>X</span>Cancel</span>
+    <span class="help-key"><span>Tab</span>Switch Panel</span>
+    <span class="help-key"><span>S</span>Save</span>
+    <span class="help-key"><span>C</span>Configure Character</span>
+    <span class="help-key"><span>I</span>Add Item</span>
+  </div>
+
+</div>
+
+<script>
+// ===========================
+//  DEFAULT CHARACTER DATA
+// ===========================
+const DEFAULT_CHARACTER = {
+  name: 'HERO',
+  charClass: 'Warrior',
+  portrait: '⚔️',
+  bio: 'A brave adventurer who set out from a small village to prove their worth and protect the realm from darkness.',
+  level: 1,
+  title: 'Novice',
+  hp: 100, maxHp: 100,
+  mp: 50,  maxMp: 50,
+  xp: 0,   maxXp: 100,
+  gold: 150,
+  location: 'Starter Village',
+  region: 'Greenfields',
+  playSeconds: 0,
+  stats: { STR: 10, DEX: 8, INT: 6, WIS: 7, CON: 12, CHA: 9 },
+  statusEffects: [
+    { name: 'Rested', type: 'buff' }
+  ],
+  equipment: {
+    'Weapon':    { icon: '🗡️', name: 'Iron Sword' },
+    'Off-Hand':  { icon: '🛡️', name: 'Wooden Shield' },
+    'Helmet':    { icon: '⛑️', name: 'Leather Cap' },
+    'Armor':     { icon: '🥋', name: 'Traveler\'s Vest' },
+    'Boots':     { icon: '👟', name: 'Walking Boots' },
+    'Accessory': { icon: '💍', name: 'Lucky Charm' }
+  },
+  affinities: [
+    { element: '🔥 Fire', color: '#ff6030', border: '#802010', resist: 'Neutral' },
+    { element: '💧 Water', color: '#30a0ff', border: '#104080', resist: 'Weak' },
+    { element: '⚡ Thunder', color: '#f0e030', border: '#806000', resist: 'Resistant' },
+    { element: '🌿 Nature', color: '#40d040', border: '#105010', resist: 'Neutral' },
+    { element: '🌑 Dark', color: '#a060ff', border: '#402080', resist: 'Neutral' },
+    { element: '✨ Holy', color: '#ffffff', border: '#a09060', resist: 'Neutral' }
+  ],
+  skills: [
+    { icon: '⚔️', name: 'Power Strike', desc: 'Deal 150% physical damage to one enemy.', cost: '10 MP', level: 3, maxLevel: 10 },
+    { icon: '🛡️', name: 'Iron Guard', desc: 'Reduce incoming damage by 40% for 3 turns.', cost: '8 MP', level: 2, maxLevel: 10 },
+    { icon: '🌀', name: 'Whirlwind', desc: 'Strike all enemies for 80% damage.', cost: '20 MP', level: 1, maxLevel: 10 },
+    { icon: '❤️', name: 'Second Wind', desc: 'Restore 30% of max HP instantly.', cost: '25 MP', level: 1, maxLevel: 10 },
+    { icon: '⚡', name: 'Thunderclap', desc: 'Unleash electric energy stunning enemies.', cost: '35 MP', level: 1, maxLevel: 10 },
+    { icon: '🔥', name: 'Inferno Blade', desc: 'Coat weapon in fire. Burns for 3 turns.', cost: '30 MP', level: 0, maxLevel: 10 }
+  ],
+  inventory: [
+    { id: 1, icon: '🧪', name: 'Health Potion', type: 'item', rarity: 'common', qty: 5, desc: 'Restores 50 HP when consumed.', stats: [{ name: '+HP', val: '+50', pos: true }] },
+    { id: 2, icon: '💙', name: 'Mana Potion', type: 'item', rarity: 'common', qty: 3, desc: 'Restores 30 MP when consumed.', stats: [{ name: '+MP', val: '+30', pos: true }] },
+    { id: 3, icon: '🗡️', name: 'Iron Sword', type: 'weapon', rarity: 'common', qty: 1, desc: 'A sturdy iron sword. Reliable in most battles.', stats: [{ name: 'ATK', val: '+18', pos: true }, { name: 'SPD', val: '-2', pos: false }] },
+    { id: 4, icon: '🛡️', name: 'Wooden Shield', type: 'armor', rarity: 'common', qty: 1, desc: 'A basic wooden shield. Better than nothing.', stats: [{ name: 'DEF', val: '+8', pos: true }] },
+    { id: 5, icon: '💎', name: 'Sapphire Gem', type: 'key', rarity: 'rare', qty: 1, desc: 'A glowing blue gem. Seems important.', stats: [] },
+    { id: 6, icon: '🏹', name: 'Silver Bow', type: 'weapon', rarity: 'uncommon', qty: 1, desc: 'A finely crafted silver bow. Good range.', stats: [{ name: 'ATK', val: '+14', pos: true }, { name: 'RNG', val: '+5', pos: true }] },
+    { id: 7, icon: '⛑️', name: 'Leather Cap', type: 'armor', rarity: 'common', qty: 1, desc: 'Light leather protection for the head.', stats: [{ name: 'DEF', val: '+4', pos: true }] },
+    { id: 8, icon: '🔑', name: 'Dungeon Key', type: 'key', rarity: 'uncommon', qty: 1, desc: 'Opens a certain door deep in the ruins.', stats: [] },
+    { id: 9, icon: '📜', name: 'Quest Scroll', type: 'key', rarity: 'epic', qty: 1, desc: 'Ancient text describing the location of the Crystal of Eternity.', stats: [] },
+    { id: 10, icon: '🧲', name: 'Magnet Stone', type: 'item', rarity: 'uncommon', qty: 2, desc: 'Attracts metal objects. Useful for puzzles.', stats: [] }
+  ],
+  mapPlayerPos: { row: 7, col: 10 },
+  visitedLocations: ['Starter Village', 'Forest Path', 'Ancient Ruins'],
+  currentLocation: 'Starter Village'
+};
+
+// World locations
+const WORLD_LOCATIONS = [
+  { name: 'Starter Village', type: 'town',    row: 7,  col: 10, discovered: true },
+  { name: 'Forest Path',     type: 'wild',    row: 5,  col: 8,  discovered: true },
+  { name: 'Ancient Ruins',   type: 'dungeon', row: 3,  col: 14, discovered: true },
+  { name: 'Crystal Caves',   type: 'dungeon', row: 11, col: 5,  discovered: false },
+  { name: 'Sky Temple',      type: 'special', row: 1,  col: 16, discovered: false },
+  { name: 'Trade City',      type: 'town',    row: 9,  col: 17, discovered: false },
+  { name: 'Cursed Swamp',    type: 'wild',    row: 13, col: 3,  discovered: false }
+];
+
+// Map tile definitions [char, class]
+const MAP_TILES = [
+  ['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['▲','mc-mount'],['▲','mc-mount'],['~','mc-water'],['~','mc-water'],
+  ['~','mc-water'],['~','mc-water'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['·','mc-path'],['·','mc-path'],['·','mc-path'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['★','mc-player'],['▲','mc-mount'],['▲','mc-mount'],['~','mc-water'],
+  ['~','mc-water'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['·','mc-path'],['·','mc-path'],['·','mc-path'],['·','mc-path'],['·','mc-path'],['·','mc-path'],['·','mc-path'],['☠','mc-dungeon'],['·','mc-path'],['·','mc-path'],['▲','mc-mount'],['▲','mc-mount'],['~','mc-water'],
+  ['~','mc-water'],['~','mc-water'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['·','mc-path'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['·','mc-path'],['♣','mc-forest'],['·','mc-path'],['▲','mc-mount'],['▲','mc-mount'],['~','mc-water'],
+  ['~','mc-water'],['~','mc-water'],['~','mc-water'],['♣','mc-forest'],['♣','mc-forest'],['·','mc-path'],['♣','mc-forest'],['♣','mc-forest'],['·','mc-path'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['·','mc-path'],['♣','mc-forest'],['♣','mc-forest'],['▲','mc-mount'],['~','mc-water'],['~','mc-water'],
+  ['~','mc-water'],['~','mc-water'],['~','mc-water'],['·','mc-path'],['·','mc-path'],['♣','mc-forest'],['♣','mc-forest'],['·','mc-path'],['·','mc-path'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['·','mc-path'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['~','mc-water'],['~','mc-water'],
+  ['~','mc-water'],['~','mc-water'],['·','mc-path'],['♣','mc-forest'],['·','mc-path'],['·','mc-path'],['·','mc-path'],['·','mc-path'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['·','mc-path'],['·','mc-path'],['·','mc-path'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['♣','mc-forest'],['·','mc-grass'],
+  ['~','mc-water'],['~','mc-water'],['·','mc-path'],['·','mc-path'],['·','mc-path'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['⌂','mc-town'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['♣','mc-forest'],['·','mc-grass'],
+  ['~','mc-water'],['·','mc-path'],['·','mc-path'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['♣','mc-forest'],['♣','mc-forest'],['·','mc-grass'],
+  ['~','mc-water'],['·','mc-path'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['⌂','mc-town'],['♣','mc-forest'],['~','mc-water'],
+  ['~','mc-water'],['~','mc-water'],['·','mc-grass'],['·','mc-desert'],['·','mc-desert'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['~','mc-water'],['~','mc-water'],
+  ['~','mc-water'],['~','mc-water'],['·','mc-desert'],['·','mc-desert'],['·','mc-desert'],['☠','mc-dungeon'],['·','mc-desert'],['·','mc-desert'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['~','mc-water'],['~','mc-water'],['~','mc-water'],
+  ['~','mc-water'],['~','mc-water'],['~','mc-water'],['·','mc-desert'],['·','mc-desert'],['·','mc-desert'],['·','mc-desert'],['·','mc-desert'],['·','mc-desert'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['·','mc-grass'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],
+  ['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['·','mc-desert'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],
+  ['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water'],['~','mc-water']
+];
+
+const PORTRAITS = ['⚔️','🧙','🏹','🛡️','🗡️','⚡','🔥','🌿','💀','🐉','🦸','🧝','🧛','🧟','🦊','🐺','👑','💎','🌙','☀️','🌟','🔮','🪄','🏰'];
+const RARITY_COLORS = { common: '#aaaaaa', uncommon: '#40a040', rare: '#4060e0', epic: '#8040d0', legendary: '#d08020' };
+
+let character = JSON.parse(JSON.stringify(DEFAULT_CHARACTER));
+let selectedItemId = null;
+let currentInvFilter = 'all';
+let playTimer = null;
+
+// ===========================
+//  INIT
+// ===========================
+function init() {
+  const saved = localStorage.getItem('rpg-character');
+  if (saved) {
+    try { character = JSON.parse(saved); } catch(e) {}
+  }
+  renderAll();
+  buildMap();
+  startTimer();
+  setupKeyboard();
+}
+
+function renderAll() {
+  renderSidebar();
+  renderStatus();
+  renderInventory();
+  renderMapLocations();
+  renderSkills();
+}
+
+// ===========================
+//  SIDEBAR
+// ===========================
+function renderSidebar() {
+  const c = character;
+  document.getElementById('portrait-emoji').textContent = c.portrait;
+  document.getElementById('char-name').textContent = c.name.toUpperCase();
+  document.getElementById('char-class').textContent = c.charClass;
+  document.getElementById('char-level').innerHTML = `LV. ${c.level} &nbsp;|&nbsp; <span style="color:var(--text-dim)">${c.title.toUpperCase()}</span>`;
+  document.getElementById('location-name').textContent = c.currentLocation;
+  document.getElementById('location-area').textContent = c.region ? `[ ${c.region} ]` : '';
+  document.getElementById('gold-display').textContent = c.gold.toLocaleString();
+
+  const hpPct = Math.max(0, Math.min(100, (c.hp / c.maxHp) * 100));
+  const mpPct = Math.max(0, Math.min(100, (c.mp / c.maxMp) * 100));
+  const xpPct = Math.max(0, Math.min(100, (c.xp / c.maxXp) * 100));
+
+  document.getElementById('hp-bar').style.width = hpPct + '%';
+  document.getElementById('mp-bar').style.width = mpPct + '%';
+  document.getElementById('xp-bar').style.width = xpPct + '%';
+  document.getElementById('hp-text').textContent = `${c.hp}/${c.maxHp}`;
+  document.getElementById('mp-text').textContent = `${c.mp}/${c.maxMp}`;
+  document.getElementById('xp-text').textContent = `${c.xp}/${c.maxXp}`;
+
+  // Color HP bar by percentage
+  const hpEl = document.getElementById('hp-bar');
+  if (hpPct <= 25) hpEl.style.background = '#ff3030';
+  else if (hpPct <= 50) hpEl.style.background = '#ff8030';
+  else hpEl.style.background = 'var(--hp-color)';
+
+  // Status effects
+  const fx = document.getElementById('status-effects');
+  if (c.statusEffects && c.statusEffects.length > 0) {
+    fx.innerHTML = c.statusEffects.map(e =>
+      `<span class="status-tag status-${e.type}">${e.name}</span>`
+    ).join('');
+  } else {
+    fx.innerHTML = `<span style="color:var(--text-dim);font-size:7px;">Normal</span>`;
+  }
+}
+
+// ===========================
+//  STATUS PANEL
+// ===========================
+function renderStatus() {
+  const c = character;
+
+  // Stats
+  const grid = document.getElementById('stats-grid');
+  const statNames = ['STR','DEX','INT','WIS','CON','CHA'];
+  const statDescs = { STR:'Strength', DEX:'Dexterity', INT:'Intelligence', WIS:'Wisdom', CON:'Constitution', CHA:'Charisma' };
+  grid.innerHTML = statNames.map(s => {
+    const val = c.stats[s] || 0;
+    const mod = Math.floor((val - 10) / 2);
+    const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
+    return `<div class="stat-box" title="${statDescs[s]}">
+      <div class="stat-name">${s}</div>
+      <div class="stat-val">${val}</div>
+      <div class="stat-mod">${modStr}</div>
+    </div>`;
+  }).join('');
+
+  // Equipment
+  const equipGrid = document.getElementById('equip-grid');
+  const slots = Object.keys(c.equipment);
+  equipGrid.innerHTML = slots.map(slot => {
+    const eq = c.equipment[slot];
+    const hasItem = eq && eq.name && eq.name !== '—';
+    return `<div class="equip-slot" onclick="notify('${slot}: ${eq?.name || 'empty'}')">
+      <div class="equip-slot-icon">${eq?.icon || '❔'}</div>
+      <div class="equip-slot-info">
+        <div class="equip-slot-type">${slot.toUpperCase()}</div>
+        <div class="equip-slot-name ${hasItem ? '' : 'empty'}">${eq?.name || '— empty —'}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Affinities
+  const affRow = document.getElementById('affinity-row');
+  affRow.innerHTML = c.affinities.map(a => {
+    const resistColors = { Weak: '#ff5050', Neutral: '#aaaaaa', Resistant: '#50e050', Immune: '#f0c060', Absorb: '#a060ff' };
+    const col = resistColors[a.resist] || '#aaa';
+    return `<div class="affinity-badge" style="color:${a.color};border-color:${a.border};background:${a.border}22">
+      ${a.element} <span style="color:${col}">${a.resist}</span>
+    </div>`;
+  }).join('');
+
+  // Bio
+  document.getElementById('char-bio').textContent = c.bio || '—';
+}
+
+// ===========================
+//  INVENTORY
+// ===========================
+function renderInventory() {
+  const grid = document.getElementById('inv-grid');
+  const items = character.inventory.filter(i => currentInvFilter === 'all' || i.type === currentInvFilter);
+  const cells = 36;
+  let html = '';
+  for (let i = 0; i < cells; i++) {
+    const item = items[i];
+    if (item) {
+      const sel = selectedItemId === item.id ? 'selected' : '';
+      html += `<div class="inv-item inv-item-rarity-${item.rarity} ${sel}"
+        onclick="selectItem(${item.id})" title="${item.name}">
+        <div class="inv-item-icon">${item.icon}</div>
+        ${item.qty > 1 ? `<div class="inv-item-qty">x${item.qty}</div>` : ''}
+      </div>`;
+    } else {
+      html += `<div class="inv-item inv-item-empty"></div>`;
+    }
+  }
+  grid.innerHTML = html;
+}
+
+function filterInventory(cat) {
+  currentInvFilter = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('cat-' + cat).classList.add('active');
+  selectedItemId = null;
+  document.getElementById('item-detail-empty').style.display = 'block';
+  document.getElementById('item-detail-content').classList.remove('visible');
+  renderInventory();
+}
+
+function selectItem(id) {
+  selectedItemId = id;
+  const item = character.inventory.find(i => i.id === id);
+  if (!item) return;
+
+  document.getElementById('item-detail-empty').style.display = 'none';
+  const dc = document.getElementById('item-detail-content');
+  dc.classList.add('visible');
+
+  document.getElementById('item-icon-big').textContent = item.icon;
+  document.getElementById('item-name').textContent = item.name;
+  const rCol = RARITY_COLORS[item.rarity] || '#aaa';
+  document.getElementById('item-rarity').innerHTML = `<span style="color:${rCol}">◆ ${item.rarity.toUpperCase()} ◆</span>`;
+  document.getElementById('item-type').textContent = item.type.toUpperCase() + ' · QTY: ' + item.qty;
+  document.getElementById('item-desc').textContent = item.desc;
+
+  const statsEl = document.getElementById('item-stats');
+  if (item.stats && item.stats.length > 0) {
+    statsEl.innerHTML = item.stats.map(s =>
+      `<div class="item-stat-line">
+        <span style="color:var(--text-dim)">${s.name}</span>
+        <span class="item-stat-val ${s.pos ? 'pos' : 'neg'}">${s.val}</span>
+      </div>`
+    ).join('');
+  } else {
+    statsEl.innerHTML = '';
+  }
+
+  const useBtn = document.getElementById('item-use-btn');
+  useBtn.textContent = item.type === 'weapon' || item.type === 'armor' ? 'EQUIP' : 'USE';
+
+  renderInventory();
+}
+
+function useItem() {
+  if (!selectedItemId) return;
+  const item = character.inventory.find(i => i.id === selectedItemId);
+  if (!item) return;
+
+  if (item.type === 'item') {
+    if (item.qty > 1) item.qty--;
+    else character.inventory = character.inventory.filter(i => i.id !== selectedItemId);
+
+    // Apply effect if it's a healing item
+    const hpStat = item.stats && item.stats.find(s => s.name === '+HP');
+    if (hpStat) {
+      const amount = parseInt(hpStat.val) || 0;
+      character.hp = Math.min(character.maxHp, character.hp + amount);
+    }
+    const mpStat = item.stats && item.stats.find(s => s.name === '+MP');
+    if (mpStat) {
+      const amount = parseInt(mpStat.val) || 0;
+      character.mp = Math.min(character.maxMp, character.mp + amount);
+    }
+
+    notify(`Used ${item.name}!`);
+    selectedItemId = null;
+    document.getElementById('item-detail-empty').style.display = 'block';
+    document.getElementById('item-detail-content').classList.remove('visible');
+  } else if (item.type === 'weapon') {
+    character.equipment['Weapon'] = { icon: item.icon, name: item.name };
+    notify(`Equipped ${item.name}!`);
+  } else if (item.type === 'armor') {
+    character.equipment['Armor'] = { icon: item.icon, name: item.name };
+    notify(`Equipped ${item.name}!`);
+  } else {
+    notify(`Cannot use ${item.name} here.`);
+  }
+
+  renderSidebar();
+  renderStatus();
+  renderInventory();
+}
+
+function dropItem() {
+  if (!selectedItemId) return;
+  const item = character.inventory.find(i => i.id === selectedItemId);
+  if (!item) return;
+  character.inventory = character.inventory.filter(i => i.id !== selectedItemId);
+  notify(`Dropped ${item.name}.`);
+  selectedItemId = null;
+  document.getElementById('item-detail-empty').style.display = 'block';
+  document.getElementById('item-detail-content').classList.remove('visible');
+  renderInventory();
+}
+
+// ===========================
+//  MAP
+// ===========================
+function buildMap() {
+  const grid = document.getElementById('map-grid');
+  const playerRow = character.mapPlayerPos.row;
+  const playerCol = character.mapPlayerPos.col;
+  let html = '';
+
+  MAP_TILES.forEach((row, ri) => {
+    row.forEach((cell, ci) => {
+      const [char, cls] = cell;
+      const isPlayer = ri === playerRow && ci === playerCol;
+      // Fog of war: hide cells too far from any visited location
+      const nearVisited = WORLD_LOCATIONS.some(loc => loc.discovered && Math.abs(loc.row - ri) <= 4 && Math.abs(loc.col - ci) <= 5);
+      const fog = !nearVisited && !isPlayer ? 'mc-fog' : '';
+
+      // Check if a location is here
+      const loc = WORLD_LOCATIONS.find(l => l.row === ri && l.col === ci);
+
+      if (isPlayer) {
+        html += `<div class="map-cell mc-player player" title="You are here" onclick="mapCellClick(${ri},${ci})">★</div>`;
+      } else if (loc && loc.discovered) {
+        const typeIcon = loc.type === 'town' ? '⌂' : loc.type === 'dungeon' ? '☠' : loc.type === 'special' ? '✦' : '·';
+        const typeClass = loc.type === 'town' ? 'mc-town' : loc.type === 'dungeon' ? 'mc-dungeon' : loc.type === 'special' ? 'mc-player' : 'mc-grass';
+        html += `<div class="map-cell ${typeClass} ${fog}" title="${loc.name}" onclick="travelTo('${loc.name}',${ri},${ci})">${typeIcon}</div>`;
+      } else {
+        html += `<div class="map-cell ${cls} ${fog}" onclick="mapCellClick(${ri},${ci})">${fog ? '?' : char}</div>`;
+      }
+    });
+  });
+
+  grid.innerHTML = html;
+  renderMapLocations();
+}
+
+function renderMapLocations() {
+  const list = document.getElementById('map-locations');
+  list.innerHTML = WORLD_LOCATIONS.map(loc => {
+    const isVisited = character.visitedLocations && character.visitedLocations.includes(loc.name);
+    const isCurrent = loc.name === character.currentLocation;
+    const stateClass = isCurrent ? 'current' : isVisited ? 'visited' : 'unvisited';
+    if (!loc.discovered) {
+      return `<div class="location-item unvisited">
+        <div class="loc-dot" style="background:#333;"></div>
+        <span>???  Unknown</span>
+      </div>`;
+    }
+    return `<div class="location-item ${stateClass}" onclick="travelTo('${loc.name}',${loc.row},${loc.col})">
+      <div class="loc-dot ${loc.type}"></div>
+      <span>${loc.name}${isCurrent ? ' ◀' : ''}</span>
+    </div>`;
+  }).join('');
+}
+
+function travelTo(name, row, col) {
+  character.currentLocation = name;
+  character.mapPlayerPos = { row, col };
+  if (!character.visitedLocations) character.visitedLocations = [];
+  if (!character.visitedLocations.includes(name)) character.visitedLocations.push(name);
+
+  // Discover nearby locations
+  WORLD_LOCATIONS.forEach(loc => {
+    if (!loc.discovered && Math.abs(loc.row - row) <= 3 && Math.abs(loc.col - col) <= 4) {
+      loc.discovered = true;
+      notify(`Discovered: ${loc.name}!`);
+    }
+  });
+
+  notify(`Traveled to ${name}`);
+  renderSidebar();
+  buildMap();
+}
+
+function mapCellClick(row, col) {
+  document.getElementById('map-info').innerHTML =
+    `<span style="color:var(--text-dim)">▶ Row ${row}, Col ${col} — No location here.</span>`;
+}
+
+// ===========================
+//  SKILLS
+// ===========================
+function renderSkills() {
+  const grid = document.getElementById('skills-grid');
+  grid.innerHTML = character.skills.map((sk, i) => {
+    const lvlPct = (sk.level / sk.maxLevel) * 100;
+    return `<div class="skill-item">
+      <div class="skill-icon">${sk.icon}</div>
+      <div class="skill-info" style="flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div class="skill-name">${sk.name}</div>
+          <div class="skill-level">LV${sk.level}/${sk.maxLevel}</div>
+        </div>
+        <div class="skill-desc">${sk.desc}</div>
+        <div class="skill-cost">${sk.cost}</div>
+        <div class="skill-lvl-bar"><div class="skill-lvl-fill" style="width:${lvlPct}%"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===========================
+//  TABS
+// ===========================
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'map') buildMap();
+}
+
+// ===========================
+//  CHARACTER SETUP MODAL
+// ===========================
+function openCharSetup() {
+  const c = character;
+  document.getElementById('modal-title').textContent = 'CHARACTER SETUP';
+  document.getElementById('modal-content').innerHTML = `
+    <div class="form-row">
+      <label class="form-label">CHARACTER NAME</label>
+      <input class="form-input" id="f-name" maxlength="20" value="${c.name}">
+    </div>
+    <div class="form-row-2" style="margin-bottom:14px;">
+      <div class="form-row" style="margin:0">
+        <label class="form-label">CLASS</label>
+        <select class="form-select" id="f-class">
+          ${['Warrior','Mage','Rogue','Paladin','Ranger','Bard','Cleric','Druid','Berserker','Necromancer'].map(cl =>
+            `<option value="${cl}" ${c.charClass===cl?'selected':''}>${cl}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-row" style="margin:0">
+        <label class="form-label">TITLE / RANK</label>
+        <input class="form-input" id="f-title" value="${c.title}">
+      </div>
+    </div>
+    <div class="form-row-3" style="margin-bottom:14px;">
+      <div class="form-row" style="margin:0">
+        <label class="form-label">LEVEL</label>
+        <input class="form-input" id="f-level" type="number" min="1" max="99" value="${c.level}">
+      </div>
+      <div class="form-row" style="margin:0">
+        <label class="form-label">MAX HP</label>
+        <input class="form-input" id="f-maxhp" type="number" min="1" value="${c.maxHp}">
+      </div>
+      <div class="form-row" style="margin:0">
+        <label class="form-label">MAX MP</label>
+        <input class="form-input" id="f-maxmp" type="number" min="0" value="${c.maxMp}">
+      </div>
+    </div>
+    <div class="form-row-3" style="margin-bottom:14px;">
+      <div class="form-row" style="margin:0">
+        <label class="form-label">CURRENT HP</label>
+        <input class="form-input" id="f-hp" type="number" min="0" value="${c.hp}">
+      </div>
+      <div class="form-row" style="margin:0">
+        <label class="form-label">CURRENT MP</label>
+        <input class="form-input" id="f-mp" type="number" min="0" value="${c.mp}">
+      </div>
+      <div class="form-row" style="margin:0">
+        <label class="form-label">GOLD</label>
+        <input class="form-input" id="f-gold" type="number" min="0" value="${c.gold}">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">CORE STATS</label>
+      <div class="form-row-6">
+        ${['STR','DEX','INT','WIS','CON','CHA'].map(s =>
+          `<div class="stat-input-wrap">
+            <label class="form-label">${s}</label>
+            <input class="form-input" id="f-stat-${s}" type="number" min="1" max="30" value="${c.stats[s]||10}">
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">LOCATION / REGION</label>
+      <div class="form-row-2" style="margin:0">
+        <input class="form-input" id="f-location" placeholder="Location" value="${c.currentLocation}">
+        <input class="form-input" id="f-region" placeholder="Region" value="${c.region||''}">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">BIOGRAPHY</label>
+      <textarea class="form-input" id="f-bio" rows="3" style="resize:vertical;line-height:1.8;">${c.bio||''}</textarea>
+    </div>
+    <div class="form-row">
+      <label class="form-label">STATUS EFFECTS (comma-separated, prefix buff: or debuff:)</label>
+      <input class="form-input" id="f-effects" placeholder="e.g. buff:Rested, debuff:Poisoned"
+        value="${(c.statusEffects||[]).map(e => e.type+':'+e.name).join(', ')}">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">CANCEL</button>
+      <button class="btn-primary" onclick="saveCharSetup()">CONFIRM</button>
+    </div>
+  `;
+  openModal();
+}
+
+function saveCharSetup() {
+  const c = character;
+  c.name = document.getElementById('f-name').value || c.name;
+  c.charClass = document.getElementById('f-class').value;
+  c.title = document.getElementById('f-title').value;
+  c.level = parseInt(document.getElementById('f-level').value) || 1;
+  c.maxHp = parseInt(document.getElementById('f-maxhp').value) || 100;
+  c.maxMp = parseInt(document.getElementById('f-maxmp').value) || 50;
+  c.hp = Math.min(parseInt(document.getElementById('f-hp').value) || c.hp, c.maxHp);
+  c.mp = Math.min(parseInt(document.getElementById('f-mp').value) || c.mp, c.maxMp);
+  c.gold = parseInt(document.getElementById('f-gold').value) || 0;
+  c.currentLocation = document.getElementById('f-location').value || c.currentLocation;
+  c.region = document.getElementById('f-region').value;
+  c.bio = document.getElementById('f-bio').value;
+
+  ['STR','DEX','INT','WIS','CON','CHA'].forEach(s => {
+    c.stats[s] = parseInt(document.getElementById('f-stat-'+s).value) || 10;
+  });
+
+  const fxRaw = document.getElementById('f-effects').value;
+  c.statusEffects = fxRaw.split(',').map(s => s.trim()).filter(Boolean).map(s => {
+    const [type, ...nameParts] = s.split(':');
+    return { type: type.trim(), name: nameParts.join(':').trim() };
+  }).filter(e => e.name);
+
+  closeModal();
+  renderAll();
+  notify('Character updated!');
+}
+
+// ===========================
+//  PORTRAIT PICKER
+// ===========================
+function openPortraitPicker() {
+  document.getElementById('modal-title').textContent = 'CHOOSE PORTRAIT';
+  document.getElementById('modal-content').innerHTML = `
+    <div class="portrait-picker" id="portrait-picker">
+      ${PORTRAITS.map(p => `<div class="portrait-opt ${character.portrait===p?'selected':''}"
+        onclick="selectPortrait('${p}')">${p}</div>`).join('')}
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">CANCEL</button>
+      <button class="btn-primary" onclick="confirmPortrait()">CONFIRM</button>
+    </div>
+  `;
+  openModal();
+}
+
+let _tmpPortrait = null;
+function selectPortrait(p) {
+  _tmpPortrait = p;
+  document.querySelectorAll('.portrait-opt').forEach(el => el.classList.remove('selected'));
+  event.target.classList.add('selected');
+}
+
+function confirmPortrait() {
+  if (_tmpPortrait) {
+    character.portrait = _tmpPortrait;
+    document.getElementById('portrait-emoji').textContent = _tmpPortrait;
+    notify('Portrait updated!');
+  }
+  closeModal();
+}
+
+// ===========================
+//  ADD ITEM MODAL
+// ===========================
+let nextItemId = 100;
+
+function openAddItemModal() {
+  document.getElementById('modal-title').textContent = 'ADD ITEM TO INVENTORY';
+  document.getElementById('modal-content').innerHTML = `
+    <div class="form-row-2" style="margin-bottom:14px;">
+      <div class="form-row" style="margin:0">
+        <label class="form-label">ITEM NAME</label>
+        <input class="form-input" id="ai-name" placeholder="e.g. Excalibur">
+      </div>
+      <div class="form-row" style="margin:0">
+        <label class="form-label">ICON (emoji)</label>
+        <input class="form-input" id="ai-icon" placeholder="e.g. ⚔️" style="font-size:18px;">
+      </div>
+    </div>
+    <div class="form-row-2" style="margin-bottom:14px;">
+      <div class="form-row" style="margin:0">
+        <label class="form-label">TYPE</label>
+        <select class="form-select" id="ai-type">
+          <option value="item">Item</option>
+          <option value="weapon">Weapon</option>
+          <option value="armor">Armor</option>
+          <option value="key">Key Item</option>
+        </select>
+      </div>
+      <div class="form-row" style="margin:0">
+        <label class="form-label">RARITY</label>
+        <select class="form-select" id="ai-rarity">
+          <option value="common">Common</option>
+          <option value="uncommon">Uncommon</option>
+          <option value="rare">Rare</option>
+          <option value="epic">Epic</option>
+          <option value="legendary">Legendary</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row-2" style="margin-bottom:14px;">
+      <div class="form-row" style="margin:0">
+        <label class="form-label">QUANTITY</label>
+        <input class="form-input" id="ai-qty" type="number" min="1" value="1">
+      </div>
+      <div class="form-row" style="margin:0">
+        <label class="form-label">STAT BONUS (e.g. ATK+25)</label>
+        <input class="form-input" id="ai-stat" placeholder="ATK+25 or DEF-5">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">DESCRIPTION</label>
+      <textarea class="form-input" id="ai-desc" rows="2" style="resize:none;line-height:1.8;" placeholder="Item description..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">CANCEL</button>
+      <button class="btn-primary" onclick="confirmAddItem()">ADD TO INVENTORY</button>
+    </div>
+  `;
+  openModal();
+}
+
+function confirmAddItem() {
+  const name = document.getElementById('ai-name').value.trim();
+  if (!name) { notify('Item name required!'); return; }
+  const icon = document.getElementById('ai-icon').value.trim() || '📦';
+  const type = document.getElementById('ai-type').value;
+  const rarity = document.getElementById('ai-rarity').value;
+  const qty = parseInt(document.getElementById('ai-qty').value) || 1;
+  const desc = document.getElementById('ai-desc').value.trim();
+  const statRaw = document.getElementById('ai-stat').value.trim();
+
+  let stats = [];
+  if (statRaw) {
+    const match = statRaw.match(/([A-Za-z]+)([+\-]\d+)/);
+    if (match) stats = [{ name: match[1], val: match[2], pos: match[2].startsWith('+') }];
+  }
+
+  character.inventory.push({ id: nextItemId++, icon, name, type, rarity, qty, desc, stats });
+  closeModal();
+  renderInventory();
+  notify(`Added ${name} to inventory!`);
+}
+
+// ===========================
+//  MODAL HELPERS
+// ===========================
+function openModal() {
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ===========================
+//  TIMER
+// ===========================
+function startTimer() {
+  playTimer = setInterval(() => {
+    character.playSeconds = (character.playSeconds || 0) + 1;
+    const h = Math.floor(character.playSeconds / 3600);
+    const m = Math.floor((character.playSeconds % 3600) / 60);
+    const s = character.playSeconds % 60;
+    document.getElementById('playtime').textContent =
+      String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }, 1000);
+}
+
+// ===========================
+//  NOTIFICATIONS
+// ===========================
+function notify(msg) {
+  const area = document.getElementById('notif-area');
+  const div = document.createElement('div');
+  div.className = 'notif';
+  div.textContent = '▶ ' + msg;
+  area.appendChild(div);
+  setTimeout(() => div.remove(), 3100);
+}
+
+// ===========================
+//  SAVE / LOAD
+// ===========================
+function saveToLocal() {
+  localStorage.setItem('rpg-character', JSON.stringify(character));
+  notify('Game saved!');
+}
+
+// ===========================
+//  KEYBOARD SHORTCUTS
+// ===========================
+function setupKeyboard() {
+  document.addEventListener('keydown', e => {
+    if (document.getElementById('modal-overlay').classList.contains('open')) {
+      if (e.key === 'Escape') closeModal();
+      return;
+    }
+    switch(e.key) {
+      case 'Tab':
+        e.preventDefault();
+        const tabs = ['status','inventory','map','skills'];
+        const cur = tabs.findIndex(t => document.getElementById('tab-'+t).classList.contains('active'));
+        switchTab(tabs[(cur+1) % tabs.length]);
+        break;
+      case 's': case 'S': saveToLocal(); break;
+      case 'c': case 'C': openCharSetup(); break;
+      case 'i': case 'I': openAddItemModal(); break;
+      case 'Escape': closeModal(); break;
+    }
+  });
+}
+
+// ===========================
+//  START
+// ===========================
+init();
+</script>
+</body>
+</html>
